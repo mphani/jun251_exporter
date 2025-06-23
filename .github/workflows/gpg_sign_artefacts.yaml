@@ -32,11 +32,12 @@ jobs:
           mkdir artefacts
           gh release download ${{ github.event.inputs.release_tag_info }} \
             --pattern '*.rpm' \
-            --dir artefacts    
-          echo
-          gh release download ${{ github.event.inputs.release_tag_info }} \
             --pattern '*.deb' \
             --dir artefacts    
+          echo
+          # gh release download ${{ github.event.inputs.release_tag_info }} \
+          #   --pattern '*.deb' \
+          #   --dir artefacts    
           echo
           echo listing downloaded artefacts
           echo
