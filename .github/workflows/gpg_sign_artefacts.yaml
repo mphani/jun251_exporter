@@ -24,7 +24,7 @@ jobs:
         with:
           #gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-key-pass: ${{ secrets.GPG_PASS }}
-          gpg-key-name: "phanitest"
+          gpg-key-name: "phani"
       - name: Download DEB & RPM from Release “${{ github.event.inputs.tag }}”
         env:
           GH_TOKEN: ${{ github.token }}      
