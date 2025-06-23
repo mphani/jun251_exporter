@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Install GPG
-        run: sudo apt-get update && sudo apt-get install gnupg dpkg-sig dpkg-dev -y
+        run: sudo apt-get update && sudo apt-get install dpkg-sig dpkg-dev -y
       - name: setup GPG
         uses: aerospike/shared-workflows/devops/setup-gpg@feat/setup-gpg-composite
         with:
@@ -35,10 +35,6 @@ jobs:
             --pattern '*.deb' \
             --dir artefacts    
           echo
-          # gh release download ${{ github.event.inputs.release_tag_info }} \
-          #   --pattern '*.deb' \
-          #   --dir artefacts    
-          echo
           echo listing downloaded artefacts
           echo
           ls -lrt artefacts/*
@@ -53,7 +49,7 @@ jobs:
           echo signing-artefacts in artefacts folder
           files=$(find ./artefacts -type f -name "aerospike-prome*.rpm" -printf "$(realpath -s %p) ")
           for file in $files; do
-               echo "gpg signing rpm -- $file"
+               echo "gpg generate sha256sum -- $file"
                sha256sum $file > $file.sha256
                gpg --armour --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256
                # Sign the package
