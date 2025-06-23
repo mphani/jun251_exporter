@@ -53,8 +53,8 @@ jobs:
                sha256sum $file > $file.sha256
                gpg --armour --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256
                # Sign the package
-               # echo adding sign to rpm -- $file
-               # rpm --addsign $file
+               echo adding sign to rpm -- $file
+               rpm --addsign $file
           done            
           # gpg --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" artefacts/*.rpm
           echo
@@ -97,7 +97,7 @@ jobs:
                sha256sum $file > $file.sha256
                gpg --armour --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256               
                # Sign the package
-               #dpkg-sig --sign builder --gpg-options "--armour --batch --pinentry-mode loopback --passphrase '$GPG_PASSPHRASE'" $file.sha256
+               dpkg-sig --sign builder --gpg-options "--armour --batch --pinentry-mode loopback --passphrase '$GPG_PASSPHRASE'" $file.sha256
           done  
           
           #dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" tests/*.deb
