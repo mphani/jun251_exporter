@@ -116,7 +116,7 @@ jobs:
 
            # List asset names, filter for .sha256 or .asc, then delete each
           for file in $(gh release view "$TAG_NAME" --json assets --jq '.assets[].name' \
-                            | grep -E '\.sha256$|\.asc$'); do
+                            | grep -E '\.rpm$|\.deb$|\.sha256$|\.asc$'); do
             echo "removing file $file"
             gh release delete-asset "$TAG_NAME" "$file" -y
           done
