@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@master
-      - name: Install GPG
+      - name: Update libraries
         run: sudo apt-get update && sudo apt-get install dpkg-sig dpkg-dev -y
-      - name: setup GPG
+      - name: Setup GPG
         uses: aerospike/shared-workflows/devops/setup-gpg@feat/setup-gpg-composite
         with:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -51,7 +51,7 @@ jobs:
           for file in $files; do
                echo "gpg generate sha256sum -- $file"
                sha256sum $file > $file.sha256
-               gpg --armour --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256
+               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256
                # Sign the package
                echo adding sign to rpm -- $file
                rpm --addsign $file
