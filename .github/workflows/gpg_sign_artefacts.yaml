@@ -59,6 +59,7 @@ jobs:
           echo Creating soft-link: sudo ln -sf $(which gpg) /usr/bin/gpg2   
           sudo ln -sf $(which gpg) /usr/bin/gpg2 
 
+          echo -e "$GPG_PASSPHRASE" > "$GNUPGHOME/passphrase"
           echo -e "$GPG_PUBLIC_KEY" > "$GNUPGHOME/public.key"
           echo "$GNUPGHOME/public.key"          
           ls -lrt "$GNUPGHOME/public.key"
@@ -80,6 +81,13 @@ jobs:
           echo Checking signature to rpm artefacts
           rpm --checksig artefacts/*.rpm
 
+          echo Signing deb files
+          echo dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" artefacts/*.deb
+          dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" artefacts/*.deb
+
+          echo Verifying deb file signature
+          dpkg-sig --verify artefacts/*.deb
+
       - name: Upload files to release-tag
         env:
           GH_TOKEN: ${{ github.token }}              
@@ -93,7 +101,7 @@ jobs:
             gh release delete-asset "$TAG_NAME" "$file" -y
           done
 
-          files=$(find ./artefacts -type f -name "aerospike-prome*.sha256*" -printf "$(realpath -s %p) ")
+          files=$(find ./artefacts -type f -name "aerospike-prome*" -printf "$(realpath -s %p) ")
           for file in $files; do
              echo "uploading file $file"
              gh release upload "$TAG_NAME" "$file"             
