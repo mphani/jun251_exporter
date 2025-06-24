@@ -58,9 +58,9 @@ jobs:
           echo Creating soft-link: sudo ln -sf $(which gpg) /usr/bin/gpg2   
           sudo ln -sf $(which gpg) /usr/bin/gpg2   
 
-          # sudo chown -R "$(whoami)":"$(whoami)" ~/.gnupg
-          # find ~/.gnupg -type d -exec chmod 700 {} \;
-          # find ~/.gnupg -type f -exec chmod 600 {} \;
+          sudo chown -R "$(whoami)":"$(whoami)" ~/.gnupg
+          find ~/.gnupg -type d -exec chmod 700 {} \;
+          find ~/.gnupg -type f -exec chmod 600 {} \;
 
           echo ls -lrt ~/.gnupg
           ls -lrt ~/.gnupg
