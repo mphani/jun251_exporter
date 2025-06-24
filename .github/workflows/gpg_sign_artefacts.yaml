@@ -76,16 +76,16 @@ jobs:
           
           # Sign using gpg
           echo Adding signature to rpm artefacts
-          rpm --addsign artefacts/*.rpm
+          rpm --addsign *.rpm
           
           echo Checking signature to rpm artefacts
-          rpm --checksig artefacts/*.rpm
+          rpm --checksig *.rpm
 
           echo Signing deb files
           dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" artefacts/*.deb
 
           echo Verifying deb file signature
-          dpkg-sig --verify artefacts/*.deb
+          dpkg-sig --verify *.deb
 
       - name: Upload files to release-tag
         env:
