@@ -64,15 +64,32 @@ jobs:
           echo "$GNUPGHOME/public.key"          
           ls -lrt "$GNUPGHOME/public.key"
 
-          # sudo chown -R "$(whoami)":"$(whoami)" ~/.gnupg
-          # find ~/.gnupg -type d -exec chmod 700 {} \;
-          # find ~/.gnupg -type f -exec chmod 600 {} \;
+          # files=$(find ./artefacts -type f -name "aerospike-prome*.rpm" -printf "$(realpath -s %p) ")
+          # for file in $files; do
+          #      echo "gpg generate sha256sum -- $file"
+          #      sha256sum $file > $file.sha256
+          #      gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256
+          # done            
+
+          files=$(find ./artefacts -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" \) -printf "$(realpath -s %p) ")            
+          for file in $files; do
+               echo "gpg generate sha256sum -- $file"
+               sha256sum $file > $file.sha256
+               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256
+          done            
+
+          # files=$(find ./artefacts -type f -name "aerospike-prome*.deb" -printf "$(realpath -s %p) ")
+          # for file in $files; do
+          #      echo "Checking gpg signing of DEB -- $file"
+          #      sha256sum $file > $file.sha256
+          #      gpg --armour --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256               
+          # done  
 
           echo ls -lrt ~/.gnupg
           ls -lrt ~/.gnupg
           rpm --import "$GNUPGHOME/public.key"
           
-          # sign using gpg
+          # Sign using gpg
           echo Adding signature to rpm artefacts
           rpm --addsign artefacts/*.rpm
 
