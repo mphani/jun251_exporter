@@ -34,7 +34,7 @@ jobs:
           ls -lrt artefacts/*
       - name: Setup GPG
         # uses: aerospike/shared-workflows/devops/setup-gpg@feat/setup-gpg-composite
-        uses: aerospike/shared-workflows/devops/setup-gpg
+        uses: aerospike/shared-workflows/devops/setup-gpg@main
         with:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-key-pass: ${{ secrets.GPG_PASS }}
