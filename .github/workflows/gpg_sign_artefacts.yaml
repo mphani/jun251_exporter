@@ -58,7 +58,8 @@ jobs:
           echo Creating soft-link: sudo ln -sf $(which gpg) /usr/bin/gpg2   
           sudo ln -sf $(which gpg) /usr/bin/gpg2 
 
-          echo "$GNUPGHOME/public.key"
+          echo -e "$GPG_PUBLIC_KEY" > "$GNUPGHOME/public.key"
+          echo "$GNUPGHOME/public.key"          
           ls -lrt "$GNUPGHOME/public.key"
 
           # sudo chown -R "$(whoami)":"$(whoami)" ~/.gnupg
