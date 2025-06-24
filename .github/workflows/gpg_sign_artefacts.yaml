@@ -61,6 +61,9 @@ jobs:
           # sudo chown -R "$(whoami)":"$(whoami)" ~/.gnupg
           # find ~/.gnupg -type d -exec chmod 700 {} \;
           # find ~/.gnupg -type f -exec chmod 600 {} \;
+
+          echo ls -lrt ~/.gnupg
+          ls -lrt ~/.gnupg
           
           # sign using gpg
           echo Adding signature to rpm artefacts
