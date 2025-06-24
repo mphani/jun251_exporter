@@ -65,10 +65,10 @@ jobs:
 
           files=$(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" \) -printf "$(realpath -s %p) ")            
           for file in $files; do
-               # file=$(basename "$filename")
-               echo "gpg generate sha256sum -- $file"
-               sha256sum $file > $file.sha256
-               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256
+               filename=$(basename "$file")
+               echo "gpg generate sha256sum -- $filename"
+               sha256sum $filename > $filename.sha256
+               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $filename.sha256
           done            
 
           # to check signature, public key needs to be imported into rpm
