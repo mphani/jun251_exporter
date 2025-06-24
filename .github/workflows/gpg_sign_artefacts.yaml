@@ -37,6 +37,7 @@ jobs:
         with:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-key-pass: ${{ secrets.GPG_PASS }}
+          gpg-public-key: ${{ secrets.GPG_PUBLIC_KEY }}
           gpg-key-name: "phani"
       - name: Sign RPM Package
         env:
@@ -57,13 +58,15 @@ jobs:
           echo Creating soft-link: sudo ln -sf $(which gpg) /usr/bin/gpg2   
           sudo ln -sf $(which gpg) /usr/bin/gpg2   
 
-          sudo chown -R "$(whoami)":"$(whoami)" ~/.gnupg
-          find ~/.gnupg -type d -exec chmod 700 {} \;
-          find ~/.gnupg -type f -exec chmod 600 {} \;
+          # sudo chown -R "$(whoami)":"$(whoami)" ~/.gnupg
+          # find ~/.gnupg -type d -exec chmod 700 {} \;
+          # find ~/.gnupg -type f -exec chmod 600 {} \;
           
           # sign using gpg
           echo Adding signature to rpm artefacts
           rpm --addsign artefacts/*.rpm
+
+          # to check signature, public key needs to be imported into rpm
           
           echo Checking signature to rpm artefacts
           rpm --checksig artefacts/*.rpm
