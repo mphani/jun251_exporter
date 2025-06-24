@@ -4,7 +4,7 @@ on:
      inputs:
         release_tag_info:
           description: enter release tag number
-          default: v1.1.1
+          default: v2.0.0
           required: true
 permissions:
   id-token: write
