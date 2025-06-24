@@ -43,71 +43,24 @@ jobs:
           GPG_TTY: no-tty
           GPG_PASSPHRASE: ${{ secrets.GPG_PASS }}
           GH_TOKEN: ${{ github.token }}      
-        run: |
-          # sign a gpg
-          echo
-          echo signing-artefacts in artefacts folder
-          files=$(find ./artefacts -type f -name "aerospike-prome*.rpm" -printf "$(realpath -s %p) ")
-          for file in $files; do
-               echo "gpg generate sha256sum -- $file"
-               sha256sum $file > $file.sha256
-               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256
-               # Sign the package
-               echo adding sign to rpm -- $file
-               rpm --addsign $file
-          done            
-          # gpg --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" artefacts/*.rpm
-          echo
-          echo list files in artefacts folder
-          ls -lrt artefacts/*
-          echo listing other files
-          ls -lrt
-      - name: Sign and check rpm # gpg sign and verify rpm packages
-        env:
-          GPG_TTY: /dev/null
           HOME: /home/runner
           GNUPGHOME: /home/runner/.gnupg
         run: |
           # Ensure environment variables are exported
           export HOME="${HOME}"
           export GNUPGHOME="${GNUPGHOME}"
-
+          
           # Create symlink for gpg2 (required for rpm signing)
-          #sudo ln -sf $(which gpg) /usr/bin/gpg2
-
-          files=$(find ./artefacts -type f -name "aerospike-prome*.rpm" -printf "$(realpath -s %p) ")
-          for file in $files; do
-               echo "Checking gpg signing of rpm -- $file"
-               # Verify the signature
-               rpm --checksig $file
-          done  
-      - name: GPG sign deb # gpg sign and verify deb packages
-        env:
-          GPG_TTY: /dev/null
-          HOME: /home/runner
-          GNUPGHOME: /home/runner/.gnupg
-        run: |
-          # Ensure environment variables are exported
-          export HOME="${HOME}"
-          export GNUPGHOME="${GNUPGHOME}"
-
-          files=$(find ./artefacts -type f -name "aerospike-prome*.deb" -printf "$(realpath -s %p) ")
-          for file in $files; do
-               echo "Checking gpg signing of DEB -- $file"
-               sha256sum $file > $file.sha256
-               gpg --armour --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $file.sha256               
-               # Sign the package
-               dpkg-sig --sign builder --gpg-options "--armour --batch --pinentry-mode loopback --passphrase '$GPG_PASSPHRASE'" $file.sha256
-          done  
+          echo Creating soft-link: sudo ln -sf $(which gpg) /usr/bin/gpg2   
+          sudo ln -sf $(which gpg) /usr/bin/gpg2   
           
-          #dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" tests/*.deb
-          # Verify the signature
-          #dpkg-sig --verify artefacts/*.deb
-          echo 
-          echo listing all files
-          echo
-          ls -lrt artefacts/*
+          # sign a gpg
+          echo Adding signature to rpm artefacts
+          rpm --addsign artefacts/*.rpm
           
+          echo Checking signature to rpm artefacts
+          rpm --checksig artefacts/*.rpm
+
       - name: Upload files to release-tag
         env:
           GH_TOKEN: ${{ github.token }}              
