@@ -42,6 +42,7 @@ jobs:
       - name: Sign RPM Package
         env:
           GPG_TTY: no-tty
+          GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASS }}
           GH_TOKEN: ${{ github.token }}      
           HOME: /home/runner
