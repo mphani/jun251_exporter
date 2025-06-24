@@ -55,7 +55,11 @@ jobs:
           
           # Create symlink for gpg2 (required for rpm signing)
           echo Creating soft-link: sudo ln -sf $(which gpg) /usr/bin/gpg2   
-          ln -sf $(which gpg) /usr/bin/gpg2   
+          sudo ln -sf $(which gpg) /usr/bin/gpg2   
+
+          sudo chown -R "$(whoami)":"$(whoami)" ~/.gnupg
+          find ~/.gnupg -type d -exec chmod 700 {} \;
+          find ~/.gnupg -type f -exec chmod 600 {} \;
           
           # sign using gpg
           echo Adding signature to rpm artefacts
