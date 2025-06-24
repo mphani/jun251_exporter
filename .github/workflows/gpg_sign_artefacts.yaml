@@ -82,7 +82,7 @@ jobs:
           rpm --checksig *.rpm
 
           echo Signing deb files
-          dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" artefacts/*.deb
+          dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" *.deb
 
           echo Verifying deb file signature
           dpkg-sig --verify *.deb
