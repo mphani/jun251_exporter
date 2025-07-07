@@ -100,7 +100,7 @@ jobs:
           #   gh release upload "$TAG_NAME" "$file"             
           # done
 
-          cd aetefacts
+          cd artefacts
           for file in $(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" -o -name "*.tgz" -o -name "*.sha256" -o -name "*.asc" \) -exec basename {} \;); do
           for file in $files; do
              echo "deleting and uploading file $file"
