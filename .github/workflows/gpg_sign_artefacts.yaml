@@ -63,29 +63,28 @@ jobs:
 
           cd artefacts
 
-          files=$(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" \) -printf "$(realpath -s %p) ")            
-          for file in $files; do
-               filename=$(basename "$file")
-               echo "gpg generate sha256sum -- $filename"
-               sha256sum $filename > $filename.sha256
-               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "$GPG_PASSPHRASE" $filename.sha256
-          done            
+          for file in $(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" -o -name "*.tgz" \) -exec basename {} \;); do
+              echo "Generating sha256sum and GPG signature for: $file"      
+              sha256sum "$file" > "$file.sha256"
+        
+              gpg --armor --digest-algo sha256 --detach-sign --no-tty --yes --passphrase "$GPG_PASSPHRASE" "$file"
+          done
 
-          # to check signature, public key needs to be imported into rpm
-          rpm --import "$GNUPGHOME/public.key"
+          # # to check signature, public key needs to be imported into rpm
+          # rpm --import "$GNUPGHOME/public.key"
           
           # Sign using gpg
-          echo Adding signature to rpm artefacts
-          rpm --addsign *.rpm
+          # echo Adding signature to rpm artefacts
+          # rpm --addsign *.rpm
           
-          echo Checking signature to rpm artefacts
-          rpm --checksig *.rpm
+          # echo Checking signature to rpm artefacts
+          # rpm --checksig *.rpm
 
-          echo Signing deb files
-          dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" *.deb
+          # echo Signing deb files
+          # dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" *.deb
 
-          echo Verifying deb file signature
-          dpkg-sig --verify *.deb
+          # echo Verifying deb file signature
+          # dpkg-sig --verify *.deb
 
       - name: Upload files to release-tag
         env:
@@ -96,12 +95,7 @@ jobs:
            # List asset names, filter for .sha256 or .asc, then delete each
           for file in $(gh release view "$TAG_NAME" --json assets --jq '.assets[].name' \
                             | grep -E '\.rpm$|\.deb$|\.sha256$|\.asc$'); do
-            echo "removing file $file"
+            echo "deleting and uploading file $file"
             gh release delete-asset "$TAG_NAME" "$file" -y
+            gh release upload "$TAG_NAME" "$file"             
           done
-
-          files=$(find ./artefacts -type f -name "aerospike-prome*" -printf "$(realpath -s %p) ")
-          for file in $files; do
-             echo "uploading file $file"
-             gh release upload "$TAG_NAME" "$file"             
-          done 
