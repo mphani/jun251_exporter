@@ -106,7 +106,7 @@ jobs:
           echo
           echo
           # for file in $(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" -o -name "*.tgz" -o -name "*.sha256" -o -name "*.asc" \) -exec basename {} \;); 
-          for file in $(find . -type f \( -o -name "*.sha256" -o -name "*.asc" \) -exec basename {} \;); do
+          for file in $(find . -type f \( -name "*.sha256" -o -name "*.asc" \) -exec basename {} \;); do
              echo "deleting and uploading file $file"
              # gh release delete-asset "$TAG_NAME" "$file" -y
              gh release upload "$TAG_NAME" "$file"             
