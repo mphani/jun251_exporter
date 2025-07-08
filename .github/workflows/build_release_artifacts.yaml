@@ -116,8 +116,8 @@ jobs:
                # gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.asc" "$file"
                
                # echo "gpg generate asc file sha256 -- $file"
-               echo "gpg generate sha256sum -- $file.sha256"
-               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.asc" "$file.sha256" 
+               echo "gpg generate asc file for -- $file.sha256"
+               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.sha256.asc" "$file.sha256" 
           done            
                                
       - name: Upload all artifacts
