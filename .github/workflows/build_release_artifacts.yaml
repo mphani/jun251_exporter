@@ -31,7 +31,7 @@ jobs:
 
     steps:
 
-      - name: Install dpkg-sig
+      - name: Install updates and dpkg sign packages
         run: sudo apt-get update && sudo apt-get install dpkg-sig dpkg-dev -y  
         
       - name: Checkout
@@ -89,6 +89,11 @@ jobs:
           gpg_key_name: ${{ secrets.GPG_KEY_NAME }}
         run: |
           echo "Sign RPM, DEB and TGZ packages"
+          echo 
+          echo GPG Run-number or TAH ==> v${{ github.run_number }}
+          echo
+          echo ========================
+          echo
           cd pkg/target
 
           # Sign using gpg
@@ -104,30 +109,36 @@ jobs:
           echo "Verifying deb file signature"
           dpkg-sig --verify *.deb
 
-          # files=$(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" -o -name "*.tgz" \) -printf "$(realpath -s %p) ")
-          # for file in $files; do
           for file in $(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" -o -name "*.tgz" \) -exec basename {} \;); 
           do
                # filename=$(basename "$file")
                echo "gpg generate sha256sum -- $file"
                sha256sum $file > $file.sha256
-               # # generate asc file for rpm
+
+               # TODO: Uncomment this if we have to generate asc file for rpm
                # echo "gpg generate asc file for -- $file"
                # gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.asc" "$file"
                
-               # echo "gpg generate asc file sha256 -- $file"
                echo "gpg generate asc file for -- $file.sha256"
                gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.sha256.asc" "$file.sha256" 
           done            
-                               
-      - name: Upload all artifacts
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ steps.get-latest-tag.outputs.tag }}
-        run: |
-          files=$(find pkg/target -type f -name "aerospike-prome*" -printf "%p ")
-          for file in $files; do
-            echo "Uploading $file to release $TAG_NAME"
-            gh release upload "$TAG_NAME" "$file"
-          done
+
+      - name: Upload to GitHub Releases
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+           tag_name: v${{ github.run_number }}
+           files: |
+              pkg/target/*
+          
+      # - name: Upload all artifacts
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+      #     TAG_NAME: ${{ steps.get-latest-tag.outputs.tag }}
+      #   run: |
+      #     files=$(find pkg/target -type f -name "aerospike-prome*" -printf "%p ")
+      #     for file in $files; do
+      #       echo "Uploading $file to release $TAG_NAME"
+      #       gh release upload "$TAG_NAME" "$file"
+      #     done
           
