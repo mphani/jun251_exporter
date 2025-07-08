@@ -86,7 +86,7 @@ jobs:
           GPG_TTY: no-tty
           HOME: /home/runner
           GNUPGHOME: /home/runner/.gnupg
-          gpg_key_name: "phani"
+          gpg_key_name: ${{ secrets.GPG_KEY_NAME }}
         run: |
           echo "Sign RPM, DEB and TGZ packages"
           cd pkg/target
