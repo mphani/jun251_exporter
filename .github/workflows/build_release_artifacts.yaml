@@ -90,46 +90,36 @@ jobs:
         run: |
           echo "Sign RPM, DEB and TGZ packages"
           cd pkg/target
-          
-          for deb in $(find . -name "*.deb"); do
-             echo "Signing and checksum for deb $deb"
-            
-             # Sign the package
-             dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" "$deb"
-            
-             # Verify the signature
-             dpkg-sig --verify "$deb"
-            
-             # External gpg sign and checksum
-             gpg --batch --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$deb.asc" "$deb"
-             shasum -a 256 "$deb" > "$deb.sha256"            
-          done
 
-          # rpm
-          for rpm in $(find . -name "*.rpm"); do
-             echo "Signing rpm $rpm"
- 
-             # Sign the package
-             rpm --addsign "$rpm"
-             
-             # Verify the signature
-             rpm --checksig "$rpm"
+          # Sign using gpg
+          echo "Adding signature to rpm artifacts"
+          rpm --addsign *.rpm
 
-             # External gpg sign and checksum
-             gpg --batch --no-tty --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$rpm.asc" "$rpm"
-             shasum -a 256 "$rpm" > "$rpm.sha256"
-             # shasum -a 256 "$rpm.asc" > "$rpm.asc.sha256"
-          done
+          echo "Checking signature to rpm artifacts"
+          rpm --checksig *.rpm
 
-          # tgz
-          for file in $(find . -name "*.tgz"); do
-             echo "Checksum for tzg $$file"
- 
-             # External gpg sign and checksum
-             gpg --batch --no-tty --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.asc" "$file"
-             shasum -a 256 "$file" > "$file.sha256"
-          done
-          
+          echo "Signing deb files"
+          dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" *.deb
+
+          echo "Verifying deb file signature"
+          dpkg-sig --verify *.deb
+
+          # files=$(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" -o -name "*.tgz" \) -printf "$(realpath -s %p) ")
+          # for file in $files; do
+          for file in $(find . -type f \( -name "*.sha256" -o -name "*.asc" \) -exec basename {} \;); 
+          do
+               # filename=$(basename "$file")
+               echo "gpg generate sha256sum -- $file"
+               sha256sum $file > $file.sha256
+               # # generate asc file for rpm
+               # echo "gpg generate asc file for -- $file"
+               # gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.asc" "$file"
+               
+               # echo "gpg generate asc file sha256 -- $file"
+               echo "gpg generate sha256sum -- $file.sha256"
+               gpg --armour --digest-algo sha256 --detach-sign --no-tty --batch --yes --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.asc" "$file.sha256" 
+          done            
+                               
       - name: Upload all artifacts
         env:
           GH_TOKEN: ${{ github.token }}
