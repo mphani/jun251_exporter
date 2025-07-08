@@ -92,7 +92,7 @@ jobs:
           cd pkg/target
           
           for deb in $(find . -name "*.deb"); do
-             echo "Signing deb $deb"
+             echo "Signing and checksum for deb $deb"
             
              # Sign the package
              dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" "$deb"
@@ -105,6 +105,7 @@ jobs:
              shasum -a 256 "$deb" > "$deb.sha256"            
           done
 
+          # rpm
           for rpm in $(find . -name "*.rpm"); do
              echo "Signing rpm $rpm"
  
@@ -115,9 +116,18 @@ jobs:
              rpm --checksig "$rpm"
 
              # External gpg sign and checksum
-             gpg --batch --no-tty --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$rpm.asc" "$rpm"             
+             gpg --batch --no-tty --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$rpm.asc" "$rpm"
              shasum -a 256 "$rpm" > "$rpm.sha256"
              # shasum -a 256 "$rpm.asc" > "$rpm.asc.sha256"
+          done
+
+          # tgz
+          for file in $(find . -name "*.tgz"); do
+             echo "Checksum for tzg $$file"
+ 
+             # External gpg sign and checksum
+             gpg --batch --no-tty --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$file.asc" "$file"
+             shasum -a 256 "$file" > "$file.sha256"
           done
           
       - name: Upload all artifacts
