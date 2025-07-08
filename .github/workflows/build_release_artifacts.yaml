@@ -86,6 +86,7 @@ jobs:
           GPG_TTY: no-tty
           HOME: /home/runner
           GNUPGHOME: /home/runner/.gnupg
+          gpg_key_name: "phani"
         run: |
           echo "Sign RPM, DEB and TGZ packages"
           cd pkg/target
@@ -100,7 +101,7 @@ jobs:
              dpkg-sig --verify "$deb"
             
              # External gpg sign and checksum
-             gpg --batch --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user aerospike-inc --output "$deb.asc" "$deb"
+             gpg --batch --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$deb.asc" "$deb"
              shasum -a 256 "$deb" > "$deb.sha256"            
           done
 
@@ -114,7 +115,7 @@ jobs:
              rpm --checksig "$rpm"
 
              # External gpg sign and checksum
-             gpg --batch --no-tty --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user aerospike-inc --output "$rpm.asc" "$rpm"             
+             gpg --batch --no-tty --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user "$gpg_key_name" --output "$rpm.asc" "$rpm"             
              shasum -a 256 "$rpm" > "$rpm.sha256"
              # shasum -a 256 "$rpm.asc" > "$rpm.asc.sha256"
           done
