@@ -88,22 +88,37 @@ jobs:
           GNUPGHOME: /home/runner/.gnupg
         run: |
           echo "Sign RPM, DEB and TGZ packages"
+          cd pkg/target
+          
+          for deb in $(find . -name "*.deb"); do
+             echo "Signing deb $deb"
+            
+             # Sign the package
+             dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" "$deb"
+            
+             # Verify the signature
+             dpkg-sig --verify "$deb"
+            
+             # External gpg sign and checksum
+             gpg --batch --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user aerospike-inc --output "$deb.asc" "$deb"
+             shasum -a 256 "$deb" > "$deb.sha256"            
+          done
 
-          # for deb in $(find . -name "*.deb"); do
-          #   echo "Signing $deb"
-            
-          #   # Sign the package
-          #   dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" "$deb"
-            
-          #   # Verify the signature
-          #   dpkg-sig --verify "$deb"
-            
-          #   # External gpg sign and checksum
-          #   gpg --batch --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user aerospike-inc --output "$deb.asc" "$deb"
-          #   shasum -a 256 "$deb" > "$deb.sha256"
-            
-          # done
+          for rpm in $(find . -name "*.rpm"); do
+             echo "Signing rpm $rpm"
+ 
+             # Sign the package
+             rpm --addsign "$rpm"
+             
+             # Verify the signature
+             rpm --checksig "$rpm"
 
+             # External gpg sign and checksum
+             gpg --batch --no-tty --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user aerospike-inc --output "$rpm.asc" "$rpm"             
+             shasum -a 256 "$rpm" > "$rpm.sha256"
+             # shasum -a 256 "$rpm.asc" > "$rpm.asc.sha256"
+          done
+          
       - name: Upload all artifacts
         env:
           GH_TOKEN: ${{ github.token }}
