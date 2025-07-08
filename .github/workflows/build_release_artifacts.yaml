@@ -30,6 +30,10 @@ jobs:
             tar_arch: aarch64
 
     steps:
+
+      - name: Install dpkg-sig
+        run: sudo apt-get update && sudo apt-get install dpkg-sig dpkg-dev -y  
+        
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -69,6 +73,36 @@ jobs:
             echo "Renaming $f"
             mv "$f" "${f%.tar.gz}.tgz"
           done
+
+      - name: Setup GPG
+        uses: aerospike/shared-workflows/.github/actions/setup-gpg@dda8173aca1f1e73f95267572a7d3849cd00f1b8  # v1.0.0
+        with:
+          gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
+          gpg-public-key: ${{ secrets.GPG_PUBLIC_KEY }}
+          gpg-key-pass: ${{ secrets.GPG_PASS }}
+
+      - name: Sign RPM, DEB and TGZ packages
+        env: 
+          GPG_TTY: no-tty
+          HOME: /home/runner
+          GNUPGHOME: /home/runner/.gnupg
+        run: |
+          echo "Sign RPM, DEB and TGZ packages"
+
+          # for deb in $(find . -name "*.deb"); do
+          #   echo "Signing $deb"
+            
+          #   # Sign the package
+          #   dpkg-sig --sign builder --gpg-options "--batch --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase" "$deb"
+            
+          #   # Verify the signature
+          #   dpkg-sig --verify "$deb"
+            
+          #   # External gpg sign and checksum
+          #   gpg --batch --yes --detach-sign --armor --passphrase "${{ secrets.GPG_PASS }}" --local-user aerospike-inc --output "$deb.asc" "$deb"
+          #   shasum -a 256 "$deb" > "$deb.sha256"
+            
+          # done
 
       - name: Upload all artifacts
         env:
