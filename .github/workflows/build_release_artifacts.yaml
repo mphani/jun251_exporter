@@ -106,7 +106,7 @@ jobs:
 
           # files=$(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" -o -name "*.tgz" \) -printf "$(realpath -s %p) ")
           # for file in $files; do
-          for file in $(find . -type f \( -name "*.sha256" -o -name "*.asc" \) -exec basename {} \;); 
+          for file in $(find . -type f \( -name "aerospike-prome*.rpm" -o -name "*.deb" -o -name "*.tgz" \) -exec basename {} \;); 
           do
                # filename=$(basename "$file")
                echo "gpg generate sha256sum -- $file"
